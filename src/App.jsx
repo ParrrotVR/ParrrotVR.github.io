@@ -85,6 +85,7 @@ function App() {
         <nav aria-label="Main navigation">
           <a className="cursor-target" data-cursor-label="GO" href="#work">Work</a>
           <a className="cursor-target" data-cursor-label="GO" href="#about">About</a>
+          <a className="prototype-nav-link cursor-target" data-cursor-label="SWITCH" href="/prototype/">Prototype 02</a>
           <a className="cursor-target" data-cursor-label="OPEN" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={13} /></a>
         </nav>
         <span className="availability"><i /> Open to collaborations</span>

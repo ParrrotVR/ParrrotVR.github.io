@@ -51,6 +51,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .nav-wrap nav { display: flex; gap: 34px; font: 400 .72rem/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
 .nav-wrap nav a { display: inline-flex; gap: 4px; align-items: center; transition: color .2s; }
 .nav-wrap nav a:hover { color: var(--acid); }
+.nav-wrap nav .prototype-nav-link { color: var(--acid); }
 .availability { justify-self: end; display: flex; align-items: center; gap: 9px; font: 400 .68rem/1 var(--mono); text-transform: uppercase; letter-spacing: .07em; }
 .availability i { width: 7px; height: 7px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 14px var(--acid); animation: pulse 2.2s infinite; }
 
