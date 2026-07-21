@@ -2,9 +2,7 @@
 
 ## React Bits
 
-The WebGL Threads background, glare interaction, Target Cursor, Click Spark,
-Magnet interactions, Prototype 02's Magnet Lines field, and Prototype 03's
-Light Rays treatment are adapted from
+The Click Spark and Magnet interactions and the Light Rays treatment are adapted from
 [React Bits](https://reactbits.dev/).
 
 MIT + Commons Clause License Condition v1.0
