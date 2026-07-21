@@ -4,6 +4,7 @@ import Reveal from './components/Reveal.jsx';
 import Magnet from './components/Magnet.jsx';
 import ClickSpark from './components/ClickSpark.jsx';
 import ScrollProgress from './components/ScrollProgress.jsx';
+import SystemsField from './components/SystemsField.jsx';
 
 const projects = [
   {
@@ -96,11 +97,15 @@ export default function Monochrome() {
           <section className="mono-quote">
             <Reveal>
               <span className="mono-label">Principle / 01</span>
-              <blockquote>“If it wasn’t meant to run there, that’s where it gets interesting.”</blockquote>
+              <blockquote>
+                <span>“If it wasn’t meant to run there,</span>
+                <strong>I’ll make it.”</strong>
+              </blockquote>
             </Reveal>
           </section>
 
           <section className="mono-work" id="mono-work">
+            <SystemsField />
             <Reveal className="mono-work-head">
               <span className="mono-label">Selected work / 04</span>
               <h2>Systems in motion.</h2>
