@@ -78,7 +78,10 @@ export default function Prototype() {
           <a className="proto-brand" href="/">P///VR</a>
           <p>Independent engineering<br />and browser systems</p>
           <span className="proto-status"><i /> Prototype 02 / Live</span>
-          <a className="proto-switch" href="/"><ArrowLeft size={15} /> Original</a>
+          <nav className="proto-switch-group">
+            <a className="proto-switch" href="/monochrome/">03 / Mono</a>
+            <a className="proto-switch" href="/"><ArrowLeft size={15} /> Original</a>
+          </nav>
         </header>
 
         <main>

@@ -11,7 +11,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(rootDirectory, 'index.html'),
-        prototype: resolve(rootDirectory, 'prototype/index.html')
+        prototype: resolve(rootDirectory, 'prototype/index.html'),
+        monochrome: resolve(rootDirectory, 'monochrome/index.html')
       }
     }
   }
