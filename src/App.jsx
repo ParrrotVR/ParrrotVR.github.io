@@ -2,6 +2,9 @@ import { ArrowDown, ArrowUpRight, MoveRight } from 'lucide-react';
 import Threads from './components/Threads.jsx';
 import GlareCard from './components/GlareCard.jsx';
 import Reveal from './components/Reveal.jsx';
+import TargetCursor from './components/TargetCursor.jsx';
+import ClickSpark from './components/ClickSpark.jsx';
+import Magnet from './components/Magnet.jsx';
 
 const projects = [
   {
@@ -73,14 +76,16 @@ function ProjectArt({ type, number }) {
 
 function App() {
   return (
-    <div className="site-shell">
+    <ClickSpark>
+      <TargetCursor />
+      <div className="site-shell">
       <a className="skip-link" href="#work">Skip to selected work</a>
       <header className="nav-wrap">
-        <a className="wordmark" href="#top" aria-label="ParrrotVR home">P<span>///</span>VR</a>
+        <a className="wordmark cursor-target" data-cursor-label="TOP" href="#top" aria-label="ParrrotVR home">P<span>///</span>VR</a>
         <nav aria-label="Main navigation">
-          <a href="#work">Work</a>
-          <a href="#about">About</a>
-          <a href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={13} /></a>
+          <a className="cursor-target" data-cursor-label="GO" href="#work">Work</a>
+          <a className="cursor-target" data-cursor-label="GO" href="#about">About</a>
+          <a className="cursor-target" data-cursor-label="OPEN" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={13} /></a>
         </nav>
         <span className="availability"><i /> Open to collaborations</span>
       </header>
@@ -97,7 +102,9 @@ function App() {
             </h1>
             <div className="hero-foot">
               <p>Browser engineering, game preservation, and security research—built to be fast, resilient, and zero-install.</p>
-              <a className="round-link" href="#work" aria-label="View selected work"><ArrowDown /></a>
+              <Magnet>
+                <a className="round-link cursor-target" data-cursor-label="VIEW" href="#work" aria-label="View selected work"><ArrowDown /></a>
+              </Magnet>
             </div>
           </div>
           <p className="hero-index">PORTFOLIO / 26</p>
@@ -112,7 +119,7 @@ function App() {
           <div className="project-list">
             {projects.map((project, index) => (
               <Reveal key={project.title} delay={index * 70}>
-                <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
+                <a className="project-link cursor-target" data-cursor-label="VIEW" href={project.href} target="_blank" rel="noreferrer">
                   <GlareCard className="project-card">
                     <ProjectArt type={project.art} number={project.number} />
                     <div className="project-copy">
@@ -146,7 +153,7 @@ function App() {
             <Reveal className="about-copy">
               <p>I’m a self-taught engineer working where the browser meets game systems and security research.</p>
               <p>I like awkward constraints: old runtimes, oversized builds, state that refuses to sync, and software that was never supposed to run there.</p>
-              <a className="text-link" href="https://github.com/ParrrotVR?tab=repositories" target="_blank" rel="noreferrer">Explore all repositories <MoveRight /></a>
+              <a className="text-link cursor-target" data-cursor-label="OPEN" href="https://github.com/ParrrotVR?tab=repositories" target="_blank" rel="noreferrer">Explore all repositories <MoveRight /></a>
             </Reveal>
             <div className="capabilities">
               {capabilities.map(([title, detail], index) => (
@@ -165,19 +172,22 @@ function App() {
           <Reveal className="contact-inner">
             <p className="eyebrow">Have a difficult idea?</p>
             <h2>Let’s make it<br /><em>work.</em></h2>
-            <a className="contact-button" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">
-              <GitHubMark /> Find me on GitHub <ArrowUpRight />
-            </a>
+            <Magnet strength={5} padding={100}>
+              <a className="contact-button cursor-target" data-cursor-label="OPEN" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">
+                <GitHubMark /> Find me on GitHub <ArrowUpRight />
+              </a>
+            </Magnet>
           </Reveal>
         </section>
       </main>
 
       <footer>
-        <a className="wordmark" href="#top">P<span>///</span>VR</a>
+        <a className="wordmark cursor-target" data-cursor-label="TOP" href="#top">P<span>///</span>VR</a>
         <p>Independent engineer / © 2026</p>
-        <a href="#top">Back to top ↑</a>
+        <a className="cursor-target" data-cursor-label="TOP" href="#top">Back to top ↑</a>
       </footer>
-    </div>
+      </div>
+    </ClickSpark>
   );
 }
 
