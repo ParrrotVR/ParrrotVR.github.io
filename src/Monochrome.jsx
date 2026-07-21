@@ -131,6 +131,17 @@ export default function Monochrome() {
             </div>
           </section>
 
+          <section className="mono-manifesto">
+            <div className="manifesto-orbits" aria-hidden="true"><i /><i /><i /><i /></div>
+            <Reveal>
+              <span className="mono-label">Principle / 02</span>
+              <blockquote>
+                <span>“If it doesn’t exist yet,</span>
+                <strong>that just means I haven’t finished making it.”</strong>
+              </blockquote>
+            </Reveal>
+          </section>
+
           <section className="mono-about">
             <Reveal className="mono-about-grid">
               <span className="mono-label">Profile / 02</span>

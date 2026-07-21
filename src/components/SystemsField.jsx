@@ -119,6 +119,11 @@ export default function SystemsField() {
 
   return (
     <div className="systems-field" ref={wrapRef} aria-hidden="true">
+      <div className="systems-field-grid" />
+      <i className="systems-orbit orbit-a" />
+      <i className="systems-orbit orbit-b" />
+      <i className="systems-orbit orbit-c" />
+      <i className="systems-orbit orbit-d" />
       <canvas ref={canvasRef} />
     </div>
   );
