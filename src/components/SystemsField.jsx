@@ -63,6 +63,13 @@ export default function SystemsField() {
       const parallaxX = (pointerX - 0.5) * 34;
       const parallaxY = (pointerY - 0.5) * 22;
       const projected = [];
+      const cardProgress = [...document.querySelectorAll('[data-project-card]')].map((card) => {
+        const cardRect = card.getBoundingClientRect();
+        return Math.min(1, Math.max(0, (height * 0.92 - cardRect.top) / (height * 0.52)));
+      });
+      const networkLevel = cardProgress.length
+        ? cardProgress.reduce((total, progress) => total + progress, 0) / cardProgress.length
+        : 0;
 
       stars.forEach((star) => {
         const x = star.x * width + parallaxX * star.depth;
@@ -90,7 +97,7 @@ export default function SystemsField() {
       });
 
       const anchors = projected.filter(point => point.anchor);
-      context.strokeStyle = 'rgba(255,255,255,.09)';
+      context.strokeStyle = `rgba(255,255,255,${0.045 + networkLevel * 0.13})`;
       context.lineWidth = 0.65;
       context.beginPath();
       anchors.forEach((point, index) => {
@@ -101,6 +108,68 @@ export default function SystemsField() {
         }
       });
       context.stroke();
+
+      const overscan = Math.max(0, (width - window.innerWidth) * 0.5);
+      const railInset = overscan + Math.max(19, window.innerWidth * 0.018);
+      const nodes = [
+        { x: railInset, y: height * 0.2 },
+        { x: width - railInset, y: height * 0.39 },
+        { x: railInset, y: height * 0.59 },
+        { x: width - railInset, y: height * 0.79 },
+      ];
+
+      context.save();
+      context.setLineDash([3, 8]);
+      context.strokeStyle = 'rgba(255,255,255,.12)';
+      context.lineWidth = 0.7;
+      context.beginPath();
+      context.moveTo(nodes[0].x, height * 0.1);
+      context.lineTo(nodes[0].x, height * 0.9);
+      context.moveTo(nodes[1].x, height * 0.1);
+      context.lineTo(nodes[1].x, height * 0.9);
+      context.stroke();
+      context.restore();
+
+      context.strokeStyle = 'rgba(255,255,255,.1)';
+      context.lineWidth = 0.8;
+      context.beginPath();
+      nodes.forEach((node, index) => {
+        if (index === 0) context.moveTo(node.x, node.y);
+        else context.lineTo(node.x, node.y);
+      });
+      context.stroke();
+
+      nodes.forEach((node, index) => {
+        const reveal = cardProgress[index] || 0;
+        const previous = nodes[index - 1];
+        if (previous && reveal > 0) {
+          const endX = previous.x + (node.x - previous.x) * reveal;
+          const endY = previous.y + (node.y - previous.y) * reveal;
+          context.strokeStyle = `rgba(255,255,255,${0.28 + reveal * 0.48})`;
+          context.lineWidth = 1.1;
+          context.beginPath();
+          context.moveTo(previous.x, previous.y);
+          context.lineTo(endX, endY);
+          context.stroke();
+        }
+
+        const pulse = 1 + Math.sin(clock * 2.1 + index) * 0.16;
+        context.strokeStyle = `rgba(255,255,255,${0.2 + reveal * 0.64})`;
+        context.fillStyle = `rgba(255,255,255,${0.08 + reveal * 0.88})`;
+        context.lineWidth = 0.8;
+        context.beginPath();
+        context.arc(node.x, node.y, (5 + reveal * 3) * pulse, 0, Math.PI * 2);
+        context.stroke();
+        context.beginPath();
+        context.arc(node.x, node.y, 1.4 + reveal * 1.6, 0, Math.PI * 2);
+        context.fill();
+
+        context.font = '9px "DM Mono", monospace';
+        context.textBaseline = 'middle';
+        context.textAlign = index % 2 === 0 ? 'left' : 'right';
+        context.fillStyle = `rgba(255,255,255,${0.2 + reveal * 0.58})`;
+        context.fillText(`NODE 0${index + 1} / ${reveal > 0.92 ? 'LINKED' : 'SEARCHING'}`, node.x + (index % 2 === 0 ? 13 : -13), node.y);
+      });
 
       const meteorPhase = motionQuery.matches ? 0.42 : (clock * 0.028) % 1;
       const meteorX = width * (1.12 - meteorPhase * 1.35);

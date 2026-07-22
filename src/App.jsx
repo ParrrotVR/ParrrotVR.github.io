@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowUpRight, Circle, Copy, Check } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Circle, Copy, Check, X } from 'lucide-react';
 import GodRays from './components/GodRays.jsx';
 import Reveal from './components/Reveal.jsx';
 import Magnet from './components/Magnet.jsx';
@@ -7,6 +7,7 @@ import ClickSpark from './components/ClickSpark.jsx';
 import ScrollProgress from './components/ScrollProgress.jsx';
 import SystemsField from './components/SystemsField.jsx';
 import DitherField from './components/DitherField.jsx';
+import MysmicCursor from './components/MysmicCursor.jsx';
 
 const projects = [
   {
@@ -15,6 +16,10 @@ const projects = [
     category: 'Realtime systems',
     description: 'A release and synchronization layer for bringing multiplayer behavior into a world that began as single-player.',
     tech: ['C#', '.NET', 'State sync'],
+    challenge: 'A single-player simulation has no native contract for shared world state, while an experimental mod still needs a safe way to distribute changing binaries.',
+    system: 'A multiplayer layer supported by a versioned release feed. The installer reads a current-build manifest and verifies every downloaded DLL against its published SHA-256 value before use.',
+    result: 'A controlled update path for the experimental multiplayer build, currently represented by release v0.3.3 in its public feed.',
+    facts: ['Versioned releases', 'SHA-256 verification', 'Experimental build'],
     href: 'https://github.com/ParrrotVR/WorldBoxMultiplayer-Releases',
     art: 'signal'
   },
@@ -24,6 +29,10 @@ const projects = [
     category: 'Game preservation',
     description: 'The complete game experience translated to a zero-install browser runtime with durable local saves.',
     tech: ['HTML5', 'JavaScript', 'Persistence'],
+    challenge: 'Getting the game into a browser was only half the port. Player progress also had to survive refreshes and remain portable outside the original runtime.',
+    system: 'A browser delivery shell with automatic persistence, manual synchronization, save diagnostics, and explicit export and import controls.',
+    result: 'A zero-install build that opens immediately while keeping player progress durable, inspectable, and transferable.',
+    facts: ['Automatic saves', 'Export / import', 'Zero install'],
     href: 'https://github.com/ParrrotVR/cloverpit',
     art: 'portal'
   },
@@ -33,6 +42,10 @@ const projects = [
     category: 'Build engineering',
     description: 'A heavyweight Godot export redesigned for GitHub-native delivery through deterministic chunking.',
     tech: ['Godot', 'WASM', 'Tooling'],
+    challenge: 'The Godot PCK and WASM outputs exceed normal GitHub file limits, blocking straightforward repository-native delivery.',
+    system: 'A deterministic chunking workflow splits the export into 24 MB parts, with merge scripts for Windows, Linux, and macOS rebuilding the exact runtime artifacts.',
+    result: 'A heavyweight web export that remains versionable and distributable through ordinary GitHub infrastructure.',
+    facts: ['24 MB chunks', 'Cross-platform merge', 'Godot web export'],
     href: 'https://github.com/ParrrotVR/funiracoondemowebport',
     art: 'blocks'
   },
@@ -42,6 +55,10 @@ const projects = [
     category: 'Browser runtime',
     description: 'A desktop title stripped to its essential systems and repackaged as a fast, static web experience.',
     tech: ['JavaScript', 'HTML5', 'Static'],
+    challenge: 'A 233 MB PCK and 35 MB WASM build cannot be hosted as ordinary single GitHub files, yet the browser expects those resources by their original names.',
+    system: 'A chunk manifest and fetch interception layer reassembles numbered parts at runtime while retaining the isolation and service-worker behavior expected by Godot.',
+    result: 'A static, repository-hosted launch path for the original game export without requiring a separate asset server.',
+    facts: ['Runtime reassembly', 'Service worker', 'Static hosting'],
     href: 'https://github.com/ParrrotVR/ultrapoolwebport',
     art: 'spheres'
   }
@@ -60,6 +77,101 @@ function DiscordMark() {
     <svg viewBox="0 0 448 512" width="22" height="22" fill="currentColor" aria-hidden="true">
       <path d="M297.2 243.2c-13.6 0-24.6 11.2-24.6 25s11.3 25 24.6 25c13.6 0 24.6-11.2 24.6-25s-11-25-24.6-25Zm-88.2 0c-13.6 0-24.6 11.2-24.6 25s11.3 25 24.6 25c13.6 0 24.6-11.2 24.6-25s-11-25-24.6-25ZM448 52.8v406.4c0 29.1-23.5 52.8-52.6 52.8H52.6C23.5 512 0 488.3 0 459.2V52.8C0 23.7 23.5 0 52.6 0h342.7C424.5 0 448 23.7 448 52.8Zm-73.1 82.6c-27.8-13.1-57.7-22.7-88.8-28.3-3.8 6.7-8.2 15.8-11.2 23-33.1-5-65.9-5-98.4 0-3-7.2-7.5-16.3-11.4-23-31.2 5.6-61 15.2-88.9 28.3-56.2 83.7-71.4 165.3-63.8 245.8 37.3 27.5 73.4 44.2 109 55.1 8.8-12 16.6-24.8 23.4-38.2-12.8-4.8-25-10.7-36.8-17.8 3-2.2 6.1-4.6 9-7 71 32.9 147.9 32.9 218.1 0 3 2.4 6 4.8 9 7-11.8 7-24.1 13-36.9 17.8 6.7 13.4 14.6 26.2 23.4 38.2 35.7-11 71.8-27.6 109.1-55.1 9-93.4-15.3-174.2-63.7-245.8Z" />
     </svg>
+  );
+}
+
+function MysmicMark({ className = '' }) {
+  return (
+    <span className={`mysmic-mark ${className}`} aria-hidden="true">
+      <i>M</i><b /><em />
+    </span>
+  );
+}
+
+function CaseStudy({ project, index, total, onClose, onNavigate }) {
+  const panelRef = useRef(null);
+  const closeRef = useRef(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousPadding = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    const focusFrame = window.requestAnimationFrame(() => closeRef.current?.focus());
+    const handleKey = (event) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === 'ArrowLeft') onNavigate(-1);
+      if (event.key === 'ArrowRight') onNavigate(1);
+      if (event.key !== 'Tab') return;
+
+      const focusable = panelRef.current?.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKey);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPadding;
+    };
+  }, [onClose, onNavigate]);
+
+  const sections = [
+    ['01 / Challenge', project.challenge],
+    ['02 / System', project.system],
+    ['03 / Result', project.result],
+  ];
+
+  return (
+    <div className="case-study" onPointerDown={(event) => event.target === event.currentTarget && onClose()}>
+      <article className={`case-study-panel case-study-tone-${index}`} ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={`case-title-${project.number}`}>
+        <header className="case-study-topbar">
+          <div><MysmicMark className="is-case" /><span>MYSMIC / CASE {project.number}</span></div>
+          <span>{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+          <button ref={closeRef} type="button" onClick={onClose} data-cursor="CLOSE" aria-label="Close case study"><X /></button>
+        </header>
+
+        <div className="case-study-hero">
+          <div className="case-study-visual" data-cursor="MOVE"><MonoArt type={project.art} /></div>
+          <div className="case-study-intro">
+            <span className="mono-label">{project.category}</span>
+            <h2 id={`case-title-${project.number}`}>{project.title}</h2>
+            <p>{project.description}</p>
+            <ul>{project.facts.map(fact => <li key={fact}>{fact}</li>)}</ul>
+          </div>
+        </div>
+
+        <div className="case-study-body">
+          {sections.map(([label, copy]) => (
+            <section key={label}>
+              <span className="mono-label">{label}</span>
+              <p>{copy}</p>
+            </section>
+          ))}
+        </div>
+
+        <footer className="case-study-footer">
+          <div className="case-study-tech">{project.tech.map(item => <span key={item}>{item}</span>)}</div>
+          <a href={project.href} target="_blank" rel="noreferrer" data-cursor="OPEN">View repository <ArrowUpRight /></a>
+          <div className="case-study-nav">
+            <button type="button" onClick={() => onNavigate(-1)} data-cursor="PREV" aria-label="Previous case study"><ArrowLeft /></button>
+            <button type="button" onClick={() => onNavigate(1)} data-cursor="NEXT">Next system <ArrowRight /></button>
+          </div>
+        </footer>
+      </article>
+    </div>
   );
 }
 
@@ -162,7 +274,7 @@ function MonoArt({ type }) {
   };
 
   return (
-    <div className={`mono-art visual-${type}`} ref={artRef} onPointerEnter={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} aria-hidden="true">
+    <div className={`mono-art visual-${type}`} ref={artRef} onPointerEnter={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} data-cursor="TILT" aria-hidden="true">
       <div className="mono-art-space" />
       <div className="mono-art-stage">
         {type === 'signal' && <div className="signal-model"><i className="signal-globe" /><i className="signal-meridian meridian-a" /><i className="signal-meridian meridian-b" /><i className="signal-orbit" /><b>SYNC</b><span className="signal-satellite satellite-a" /><span className="signal-satellite satellite-b" /></div>}
@@ -177,6 +289,12 @@ function MonoArt({ type }) {
 
 export default function App() {
   const [discordCopied, setDiscordCopied] = useState(false);
+  const [activeProjectIndex, setActiveProjectIndex] = useState(null);
+
+  const closeCaseStudy = () => setActiveProjectIndex(null);
+  const navigateCaseStudy = (direction) => {
+    setActiveProjectIndex(current => (current + direction + projects.length) % projects.length);
+  };
 
   const copyDiscordUsername = async () => {
     try {
@@ -190,17 +308,18 @@ export default function App() {
 
   return (
     <ClickSpark colors={['#ffffff', '#777777']} sparkCount={8}>
+      <MysmicCursor />
       <ScrollProgress />
-      <div className="monochrome-shell">
+      <div className="monochrome-shell" aria-hidden={activeProjectIndex !== null ? 'true' : undefined}>
         <header className="mono-nav">
-          <a className="mono-brand" href="/" aria-label="Mysmic home">
-            <span className="mono-brand-mark" aria-hidden="true"><i>M</i></span>
+          <a className="mono-brand" href="/" data-cursor="HOME" aria-label="Mysmic home">
+            <MysmicMark className="mono-brand-mark is-nav" />
             <span className="mono-brand-name">MYSMIC</span>
           </a>
           <span><Circle size={7} fill="currentColor" /> Available for collaboration</span>
           <nav>
-            <a href="#mono-work">Work</a>
-            <a href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="#mono-work" data-cursor="WORK">Work</a>
+            <a href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer" data-cursor="OPEN">GitHub</a>
           </nav>
         </header>
 
@@ -208,6 +327,7 @@ export default function App() {
           <section className="mono-hero">
             <GodRays />
             <div className="mono-hero-shade" />
+            <div className="hero-identity" aria-hidden="true"><MysmicMark className="hero-sigil" /><span>MYSMIC<br /><small>INDEPENDENT SYSTEMS</small></span></div>
             <div className="mono-hero-topline"><span>Portfolio / 2026</span><span>Independent engineer</span><span>Chicago / US</span></div>
             <h1 aria-label="Engineering without edges">
               <span><i>Engineering</i></span>
@@ -215,7 +335,7 @@ export default function App() {
             </h1>
             <div className="mono-hero-bottom">
               <p>Building portable systems at the intersection of browsers, games, and security research.</p>
-              <a href="#mono-work" aria-label="Scroll to work"><ArrowDown /></a>
+              <a href="#mono-work" data-cursor="SCROLL" aria-label="Scroll to work"><ArrowDown /></a>
             </div>
           </section>
 
@@ -239,16 +359,19 @@ export default function App() {
             </Reveal>
             <div className="mono-stack">
               {projects.map((project, index) => (
-                <article className={`mono-card card-tone-${index}`} style={{ '--card-index': index }} key={project.title}>
+                <article className={`mono-card card-tone-${index}`} style={{ '--card-index': index }} data-project-card={index} key={project.title}>
                   <div className="mono-card-copy">
                     <div className="mono-card-meta"><span>{project.number} / 04</span><span>{project.category}</span></div>
                     <h3>{project.title}</h3>
                     <p>{project.description}</p>
                     <div className="mono-card-foot">
                       <ul>{project.tech.map(item => <li key={item}>{item}</li>)}</ul>
-                      <Magnet strength={6} padding={80}>
-                        <a href={project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.title} on GitHub`}><ArrowUpRight /></a>
-                      </Magnet>
+                      <div className="mono-card-actions">
+                        <button className="case-trigger" type="button" onClick={() => setActiveProjectIndex(index)} data-cursor="VIEW">Case study <ArrowUpRight /></button>
+                        <Magnet strength={6} padding={80}>
+                          <a href={project.href} target="_blank" rel="noreferrer" data-cursor="OPEN" aria-label={`Open ${project.title} on GitHub`}><GitHubMark /></a>
+                        </Magnet>
+                      </div>
                     </div>
                   </div>
                   <MonoArt type={project.art} />
@@ -270,23 +393,34 @@ export default function App() {
 
           <section className="mono-contact" id="mono-contact">
             <GodRays />
+            <MysmicMark className="contact-sigil" />
             <Reveal>
               <span className="mono-label">Next experiment</span>
               <h2><span>Have something</span><span>difficult in mind?</span></h2>
               <div className="mono-contact-actions">
                 <Magnet strength={8} padding={90}>
-                  <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
+                  <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer" data-cursor="OPEN"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
                 </Magnet>
                 <Magnet strength={8} padding={90}>
-                  <button className="mono-contact-link is-discord" type="button" onClick={copyDiscordUsername}><DiscordMark /> {discordCopied ? 'Username copied' : 'Copy Discord username'} {discordCopied ? <Check /> : <Copy />}</button>
+                  <button className="mono-contact-link is-discord" type="button" onClick={copyDiscordUsername} data-cursor="COPY"><DiscordMark /> {discordCopied ? 'Username copied' : 'Copy Discord username'} {discordCopied ? <Check /> : <Copy />}</button>
                 </Magnet>
               </div>
             </Reveal>
           </section>
         </main>
 
-        <footer className="mono-footer"><span>Mysmic © 2026</span><a href="#mono-work">Selected work</a><span>Independent engineer</span></footer>
+        <footer className="mono-footer"><span>Mysmic © 2026</span><a href="#mono-work" data-cursor="WORK">Selected work</a><span>Independent engineer</span></footer>
       </div>
+      {activeProjectIndex !== null && (
+        <CaseStudy
+          key={projects[activeProjectIndex].number}
+          project={projects[activeProjectIndex]}
+          index={activeProjectIndex}
+          total={projects.length}
+          onClose={closeCaseStudy}
+          onNavigate={navigateCaseStudy}
+        />
+      )}
     </ClickSpark>
   );
 }
