@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUpRight, Circle, Copy, Check } from 'lucide-react';
 import GodRays from './components/GodRays.jsx';
 import Reveal from './components/Reveal.jsx';
@@ -65,6 +65,50 @@ function DiscordMark() {
 
 function MonoArt({ type }) {
   const artRef = useRef(null);
+  const motionRef = useRef({
+    currentX: 0,
+    currentY: 0,
+    currentLightX: 50,
+    currentLightY: 50,
+    targetX: 0,
+    targetY: 0,
+    targetLightX: 50,
+    targetLightY: 50,
+    frame: 0,
+  });
+
+  const animateTilt = () => {
+    const art = artRef.current;
+    const motion = motionRef.current;
+    if (!art) {
+      motion.frame = 0;
+      return;
+    }
+
+    const easing = 0.085;
+    motion.currentX += (motion.targetX - motion.currentX) * easing;
+    motion.currentY += (motion.targetY - motion.currentY) * easing;
+    motion.currentLightX += (motion.targetLightX - motion.currentLightX) * easing;
+    motion.currentLightY += (motion.targetLightY - motion.currentLightY) * easing;
+
+    art.style.setProperty('--art-rotate-x', `${motion.currentX}deg`);
+    art.style.setProperty('--art-rotate-y', `${motion.currentY}deg`);
+    art.style.setProperty('--art-light-x', `${motion.currentLightX}%`);
+    art.style.setProperty('--art-light-y', `${motion.currentLightY}%`);
+
+    const unsettled = Math.abs(motion.targetX - motion.currentX) > 0.01
+      || Math.abs(motion.targetY - motion.currentY) > 0.01
+      || Math.abs(motion.targetLightX - motion.currentLightX) > 0.05
+      || Math.abs(motion.targetLightY - motion.currentLightY) > 0.05;
+    motion.frame = unsettled ? window.requestAnimationFrame(animateTilt) : 0;
+  };
+
+  const startTilt = () => {
+    const motion = motionRef.current;
+    if (!motion.frame) motion.frame = window.requestAnimationFrame(animateTilt);
+  };
+
+  useEffect(() => () => window.cancelAnimationFrame(motionRef.current.frame), []);
 
   const handlePointerMove = (event) => {
     const art = artRef.current;
@@ -72,19 +116,21 @@ function MonoArt({ type }) {
     const rect = art.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
-    art.style.setProperty('--art-rotate-x', `${y * -12}deg`);
-    art.style.setProperty('--art-rotate-y', `${x * 15}deg`);
-    art.style.setProperty('--art-light-x', `${(x + 0.5) * 100}%`);
-    art.style.setProperty('--art-light-y', `${(y + 0.5) * 100}%`);
+    const motion = motionRef.current;
+    motion.targetX = y * -12;
+    motion.targetY = x * 15;
+    motion.targetLightX = (x + 0.5) * 100;
+    motion.targetLightY = (y + 0.5) * 100;
+    startTilt();
   };
 
   const resetPointer = () => {
-    const art = artRef.current;
-    if (!art) return;
-    art.style.setProperty('--art-rotate-x', '0deg');
-    art.style.setProperty('--art-rotate-y', '0deg');
-    art.style.setProperty('--art-light-x', '50%');
-    art.style.setProperty('--art-light-y', '50%');
+    const motion = motionRef.current;
+    motion.targetX = 0;
+    motion.targetY = 0;
+    motion.targetLightX = 50;
+    motion.targetLightY = 50;
+    startTilt();
   };
 
   return (
@@ -92,9 +138,9 @@ function MonoArt({ type }) {
       <div className="mono-art-space" />
       <div className="mono-art-stage">
         {type === 'signal' && <div className="signal-model"><i className="signal-globe" /><i className="signal-meridian meridian-a" /><i className="signal-meridian meridian-b" /><i className="signal-orbit" /><b>SYNC</b><span className="signal-satellite satellite-a" /><span className="signal-satellite satellite-b" /></div>}
-        {type === 'portal' && <div className="portal-model"><div className="portal-cube"><i /><i /><i /><i /><i /><i /></div><span className="portal-halo halo-a" /><span className="portal-halo halo-b" /></div>}
-        {type === 'blocks' && <div className="blocks-model"><div className="mono-prism prism-a"><i /><i /><i /></div><div className="mono-prism prism-b"><i /><i /><i /></div><div className="mono-prism prism-c"><i /><i /><i /></div><span className="blocks-axis" /></div>}
-        {type === 'spheres' && <div className="spheres-model"><i className="orbital-sphere sphere-a" /><i className="orbital-sphere sphere-b" /><i className="orbital-sphere sphere-c" /><span className="sphere-orbit orbit-one" /><span className="sphere-orbit orbit-two" /></div>}
+        {type === 'portal' && <div className="slot-model"><div className="slot-machine"><strong>CLOVER</strong><div className="slot-window"><span><i>7</i><i>♣</i><i>★</i></span><span><i>♣</i><i>★</i><i>7</i></span><span><i>★</i><i>7</i><i>♣</i></span></div><div className="slot-payline" /><small>GOOD LUCK</small><span className="slot-tray" /><span className="slot-lever"><i /></span></div><i className="slot-coin coin-a">$</i><i className="slot-coin coin-b">$</i></div>}
+        {type === 'blocks' && <div className="raccoon-model"><span className="raccoon-tail" /><div className="raccoon-head"><i className="raccoon-ear ear-left" /><i className="raccoon-ear ear-right" /><span className="raccoon-mask mask-left"><b /></span><span className="raccoon-mask mask-right"><b /></span><span className="raccoon-muzzle"><b /></span></div><span className="raccoon-scanline" /></div>}
+        {type === 'spheres' && <div className="pool-model"><div className="pool-table"><i className="pool-rail rail-top" /><i className="pool-rail rail-right" /><i className="pool-rail rail-bottom" /><i className="pool-rail rail-left" /><span className="pool-pocket pocket-a" /><span className="pool-pocket pocket-b" /><span className="pool-pocket pocket-c" /><span className="pool-pocket pocket-d" /><span className="pool-pocket pocket-e" /><span className="pool-pocket pocket-f" /><b className="pool-ball ball-cue" /><b className="pool-ball ball-eight" /><b className="pool-ball ball-target" /><span className="pool-trajectory trajectory-main" /><span className="pool-trajectory trajectory-bank" /></div><span className="pool-depth-line" /></div>}
       </div>
       <span className="mono-art-caption">Pointer reactive / 3D study</span>
     </div>
