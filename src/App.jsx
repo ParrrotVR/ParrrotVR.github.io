@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUpRight, Circle } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Circle, MessageCircle } from 'lucide-react';
 import GodRays from './components/GodRays.jsx';
 import Reveal from './components/Reveal.jsx';
 import Magnet from './components/Magnet.jsx';
@@ -72,7 +72,11 @@ export default function App() {
       <ScrollProgress />
       <div className="monochrome-shell">
         <header className="mono-nav">
-          <a className="mono-brand" href="/" aria-label="Mysmic home">MYSMIC</a>
+          <a className="mono-brand" href="/" aria-label="Mysmic home">
+            <span>MY</span>
+            <span className="mono-brand-slashes" aria-hidden="true"><i>/</i><i>/</i><i>/</i></span>
+            <span>SMIC</span>
+          </a>
           <span><Circle size={7} fill="currentColor" /> Available for collaboration</span>
           <nav>
             <a href="#mono-work">Work</a>
@@ -149,9 +153,14 @@ export default function App() {
             <Reveal>
               <span className="mono-label">Next experiment</span>
               <h2><span>Have something</span><span>difficult in mind?</span></h2>
-              <Magnet strength={6} padding={100}>
-                <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
-              </Magnet>
+              <div className="mono-contact-actions">
+                <Magnet strength={8} padding={90}>
+                  <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
+                </Magnet>
+                <Magnet strength={8} padding={90}>
+                  <a className="mono-contact-link is-discord" href="https://discord.com/app" target="_blank" rel="noreferrer" aria-label="Find me on Discord as habw"><MessageCircle /> Find me on Discord <small>@habw</small><ArrowUpRight /></a>
+                </Magnet>
+              </div>
             </Reveal>
           </section>
         </main>

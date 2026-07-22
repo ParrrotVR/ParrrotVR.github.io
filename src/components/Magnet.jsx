@@ -16,10 +16,15 @@ export default function Magnet({ children, strength = 4, padding = 70, className
       const rect = wrapper.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
-      const withinX = Math.abs(event.clientX - centerX) < rect.width / 2 + padding;
-      const withinY = Math.abs(event.clientY - centerY) < rect.height / 2 + padding;
-      if (withinX && withinY) {
-        inner.style.transform = `translate3d(${(event.clientX - centerX) / strength}px, ${(event.clientY - centerY) / strength}px, 0)`;
+      const deltaX = event.clientX - centerX;
+      const deltaY = event.clientY - centerY;
+      const radiusX = rect.width / 2 + padding;
+      const radiusY = rect.height / 2 + padding;
+      const distance = Math.hypot(deltaX / radiusX, deltaY / radiusY);
+
+      if (distance < 1) {
+        const influence = Math.pow(1 - distance, 2);
+        inner.style.transform = `translate3d(${deltaX * influence / strength}px, ${deltaY * influence / strength}px, 0)`;
         inner.classList.add('is-magnetic');
       } else {
         inner.style.transform = 'translate3d(0, 0, 0)';
