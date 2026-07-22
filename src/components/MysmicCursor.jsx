@@ -2,20 +2,17 @@ import { useEffect, useRef } from 'react';
 
 export default function MysmicCursor() {
   const cursorRef = useRef(null);
-  const labelRef = useRef(null);
 
   useEffect(() => {
     const cursor = cursorRef.current;
-    const label = labelRef.current;
     const finePointer = window.matchMedia('(pointer: fine)').matches;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!cursor || !label || !finePointer || reducedMotion) return undefined;
+    if (!cursor || !finePointer || reducedMotion) return undefined;
 
     const root = document.documentElement;
     let frame = 0;
     let visible = false;
     let initialized = false;
-    let active = false;
     let currentX = 0;
     let currentY = 0;
     let targetX = 0;
@@ -49,17 +46,6 @@ export default function MysmicCursor() {
       start();
     };
 
-    const handleOver = (event) => {
-      const target = event.target.closest?.('[data-cursor]');
-      const nextLabel = target?.dataset.cursor || '';
-      const nextActive = Boolean(nextLabel);
-      if (nextActive !== active || label.textContent !== nextLabel) {
-        active = nextActive;
-        label.textContent = nextLabel;
-        cursor.classList.toggle('is-active', active);
-      }
-    };
-
     const handleLeave = () => {
       visible = false;
       cursor.classList.remove('is-visible');
@@ -70,7 +56,6 @@ export default function MysmicCursor() {
 
     root.classList.add('has-mysmic-cursor');
     window.addEventListener('pointermove', handleMove, { passive: true });
-    document.addEventListener('pointerover', handleOver, { passive: true });
     document.addEventListener('pointerdown', handleDown, { passive: true });
     document.addEventListener('pointerup', handleUp, { passive: true });
     document.addEventListener('mouseleave', handleLeave);
@@ -79,7 +64,6 @@ export default function MysmicCursor() {
       window.cancelAnimationFrame(frame);
       root.classList.remove('has-mysmic-cursor');
       window.removeEventListener('pointermove', handleMove);
-      document.removeEventListener('pointerover', handleOver);
       document.removeEventListener('pointerdown', handleDown);
       document.removeEventListener('pointerup', handleUp);
       document.removeEventListener('mouseleave', handleLeave);
@@ -88,7 +72,7 @@ export default function MysmicCursor() {
 
   return (
     <div className="mysmic-cursor" ref={cursorRef} aria-hidden="true">
-      <span className="mysmic-cursor-ring"><i ref={labelRef} /></span>
+      <span className="mysmic-cursor-ring" />
       <b />
     </div>
   );

@@ -85,7 +85,7 @@ export default function SystemsField() {
         context.fill();
 
         if (star.anchor) {
-          context.strokeStyle = `rgba(255,255,255,${0.14 + pulse * 0.18})`;
+          context.strokeStyle = `rgba(255,255,255,${0.1 + pulse * (0.1 + networkLevel * 0.16)})`;
           context.lineWidth = 0.7;
           context.beginPath();
           context.moveTo(x - 5, y);
@@ -97,78 +97,35 @@ export default function SystemsField() {
       });
 
       const anchors = projected.filter(point => point.anchor);
-      context.strokeStyle = `rgba(255,255,255,${0.045 + networkLevel * 0.13})`;
-      context.lineWidth = 0.65;
-      context.beginPath();
+      const connections = [];
       anchors.forEach((point, index) => {
-        const next = anchors[index + 1];
-        if (next && Math.hypot(next.x - point.x, next.y - point.y) < width * 0.34) {
-          context.moveTo(point.x, point.y);
-          context.lineTo(next.x, next.y);
-        }
+        const nearby = anchors
+          .map((candidate, candidateIndex) => ({
+            candidate,
+            candidateIndex,
+            distance: Math.hypot(candidate.x - point.x, candidate.y - point.y),
+          }))
+          .filter(({ candidateIndex, distance }) => candidateIndex > index && distance < width * 0.3)
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 2);
+        nearby.forEach(({ candidate }) => connections.push([point, candidate]));
       });
-      context.stroke();
 
-      const overscan = Math.max(0, (width - window.innerWidth) * 0.5);
-      const railInset = overscan + Math.max(19, window.innerWidth * 0.018);
-      const nodes = [
-        { x: railInset, y: height * 0.2 },
-        { x: width - railInset, y: height * 0.39 },
-        { x: railInset, y: height * 0.59 },
-        { x: width - railInset, y: height * 0.79 },
-      ];
-
-      context.save();
-      context.setLineDash([3, 8]);
-      context.strokeStyle = 'rgba(255,255,255,.12)';
-      context.lineWidth = 0.7;
-      context.beginPath();
-      context.moveTo(nodes[0].x, height * 0.1);
-      context.lineTo(nodes[0].x, height * 0.9);
-      context.moveTo(nodes[1].x, height * 0.1);
-      context.lineTo(nodes[1].x, height * 0.9);
-      context.stroke();
-      context.restore();
-
-      context.strokeStyle = 'rgba(255,255,255,.1)';
-      context.lineWidth = 0.8;
-      context.beginPath();
-      nodes.forEach((node, index) => {
-        if (index === 0) context.moveTo(node.x, node.y);
-        else context.lineTo(node.x, node.y);
-      });
-      context.stroke();
-
-      nodes.forEach((node, index) => {
-        const reveal = cardProgress[index] || 0;
-        const previous = nodes[index - 1];
-        if (previous && reveal > 0) {
-          const endX = previous.x + (node.x - previous.x) * reveal;
-          const endY = previous.y + (node.y - previous.y) * reveal;
-          context.strokeStyle = `rgba(255,255,255,${0.28 + reveal * 0.48})`;
-          context.lineWidth = 1.1;
-          context.beginPath();
-          context.moveTo(previous.x, previous.y);
-          context.lineTo(endX, endY);
-          context.stroke();
-        }
-
-        const pulse = 1 + Math.sin(clock * 2.1 + index) * 0.16;
-        context.strokeStyle = `rgba(255,255,255,${0.2 + reveal * 0.64})`;
-        context.fillStyle = `rgba(255,255,255,${0.08 + reveal * 0.88})`;
-        context.lineWidth = 0.8;
+      const revealBudget = networkLevel * (connections.length + 2);
+      connections.forEach(([startPoint, endPoint], index) => {
+        const reveal = Math.min(1, Math.max(0, revealBudget - index));
+        if (reveal <= 0) return;
+        const endX = startPoint.x + (endPoint.x - startPoint.x) * reveal;
+        const endY = startPoint.y + (endPoint.y - startPoint.y) * reveal;
+        const gradient = context.createLinearGradient(startPoint.x, startPoint.y, endX, endY);
+        gradient.addColorStop(0, `rgba(255,255,255,${0.03 + reveal * 0.12})`);
+        gradient.addColorStop(1, 'rgba(255,255,255,.015)');
+        context.strokeStyle = gradient;
+        context.lineWidth = 0.7;
         context.beginPath();
-        context.arc(node.x, node.y, (5 + reveal * 3) * pulse, 0, Math.PI * 2);
+        context.moveTo(startPoint.x, startPoint.y);
+        context.lineTo(endX, endY);
         context.stroke();
-        context.beginPath();
-        context.arc(node.x, node.y, 1.4 + reveal * 1.6, 0, Math.PI * 2);
-        context.fill();
-
-        context.font = '9px "DM Mono", monospace';
-        context.textBaseline = 'middle';
-        context.textAlign = index % 2 === 0 ? 'left' : 'right';
-        context.fillStyle = `rgba(255,255,255,${0.2 + reveal * 0.58})`;
-        context.fillText(`NODE 0${index + 1} / ${reveal > 0.92 ? 'LINKED' : 'SEARCHING'}`, node.x + (index % 2 === 0 ? 13 : -13), node.y);
       });
 
       const meteorPhase = motionQuery.matches ? 0.42 : (clock * 0.028) % 1;

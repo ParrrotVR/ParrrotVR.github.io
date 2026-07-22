@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Circle, Copy, Check, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Copy, Check, X } from 'lucide-react';
 import GodRays from './components/GodRays.jsx';
 import Reveal from './components/Reveal.jsx';
 import Magnet from './components/Magnet.jsx';
@@ -8,6 +8,7 @@ import ScrollProgress from './components/ScrollProgress.jsx';
 import SystemsField from './components/SystemsField.jsx';
 import DitherField from './components/DitherField.jsx';
 import MysmicCursor from './components/MysmicCursor.jsx';
+import LineWaves from './components/LineWaves.jsx';
 
 const projects = [
   {
@@ -140,11 +141,11 @@ function CaseStudy({ project, index, total, onClose, onNavigate }) {
         <header className="case-study-topbar">
           <div><MysmicMark className="is-case" /><span>MYSMIC / CASE {project.number}</span></div>
           <span>{String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
-          <button ref={closeRef} type="button" onClick={onClose} data-cursor="CLOSE" aria-label="Close case study"><X /></button>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Close case study"><X /></button>
         </header>
 
         <div className="case-study-hero">
-          <div className="case-study-visual" data-cursor="MOVE"><MonoArt type={project.art} /></div>
+          <div className="case-study-visual"><MonoArt type={project.art} /></div>
           <div className="case-study-intro">
             <span className="mono-label">{project.category}</span>
             <h2 id={`case-title-${project.number}`}>{project.title}</h2>
@@ -164,10 +165,10 @@ function CaseStudy({ project, index, total, onClose, onNavigate }) {
 
         <footer className="case-study-footer">
           <div className="case-study-tech">{project.tech.map(item => <span key={item}>{item}</span>)}</div>
-          <a href={project.href} target="_blank" rel="noreferrer" data-cursor="OPEN">View repository <ArrowUpRight /></a>
+          <a href={project.href} target="_blank" rel="noreferrer">View repository <ArrowUpRight /></a>
           <div className="case-study-nav">
-            <button type="button" onClick={() => onNavigate(-1)} data-cursor="PREV" aria-label="Previous case study"><ArrowLeft /></button>
-            <button type="button" onClick={() => onNavigate(1)} data-cursor="NEXT">Next system <ArrowRight /></button>
+            <button type="button" onClick={() => onNavigate(-1)} aria-label="Previous case study"><ArrowLeft /></button>
+            <button type="button" onClick={() => onNavigate(1)}>Next system <ArrowRight /></button>
           </div>
         </footer>
       </article>
@@ -274,7 +275,7 @@ function MonoArt({ type }) {
   };
 
   return (
-    <div className={`mono-art visual-${type}`} ref={artRef} onPointerEnter={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} data-cursor="TILT" aria-hidden="true">
+    <div className={`mono-art visual-${type}`} ref={artRef} onPointerEnter={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} aria-hidden="true">
       <div className="mono-art-space" />
       <div className="mono-art-stage">
         {type === 'signal' && <div className="signal-model"><i className="signal-globe" /><i className="signal-meridian meridian-a" /><i className="signal-meridian meridian-b" /><i className="signal-orbit" /><b>SYNC</b><span className="signal-satellite satellite-a" /><span className="signal-satellite satellite-b" /></div>}
@@ -282,7 +283,6 @@ function MonoArt({ type }) {
         {type === 'blocks' && <div className="raccoon-model"><span className="raccoon-tail" /><div className="raccoon-head"><i className="raccoon-ear ear-left" /><i className="raccoon-ear ear-right" /><span className="raccoon-mask mask-left"><b /></span><span className="raccoon-mask mask-right"><b /></span><span className="raccoon-muzzle"><b /></span></div><span className="raccoon-scanline" /></div>}
         {type === 'spheres' && <div className="pool-model"><div className="pool-table"><i className="pool-rail rail-top" /><i className="pool-rail rail-right" /><i className="pool-rail rail-bottom" /><i className="pool-rail rail-left" /><span className="pool-pocket pocket-a" /><span className="pool-pocket pocket-b" /><span className="pool-pocket pocket-c" /><span className="pool-pocket pocket-d" /><span className="pool-pocket pocket-e" /><span className="pool-pocket pocket-f" /><b className="pool-ball ball-cue" /><b className="pool-ball ball-eight" /><b className="pool-ball ball-target" /><span className="pool-trajectory trajectory-main" /><span className="pool-trajectory trajectory-bank" /></div><span className="pool-depth-line" /></div>}
       </div>
-      <span className="mono-art-caption">Pointer reactive / 3D study</span>
     </div>
   );
 }
@@ -312,14 +312,13 @@ export default function App() {
       <ScrollProgress />
       <div className="monochrome-shell" aria-hidden={activeProjectIndex !== null ? 'true' : undefined}>
         <header className="mono-nav">
-          <a className="mono-brand" href="/" data-cursor="HOME" aria-label="Mysmic home">
+          <a className="mono-brand" href="/" aria-label="Mysmic home">
             <MysmicMark className="mono-brand-mark is-nav" />
             <span className="mono-brand-name">MYSMIC</span>
           </a>
-          <span><Circle size={7} fill="currentColor" /> Available for collaboration</span>
           <nav>
-            <a href="#mono-work" data-cursor="WORK">Work</a>
-            <a href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer" data-cursor="OPEN">GitHub</a>
+            <a href="#mono-work">Work</a>
+            <a href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer">GitHub</a>
           </nav>
         </header>
 
@@ -327,15 +326,14 @@ export default function App() {
           <section className="mono-hero">
             <GodRays />
             <div className="mono-hero-shade" />
-            <div className="hero-identity" aria-hidden="true"><MysmicMark className="hero-sigil" /><span>MYSMIC<br /><small>INDEPENDENT SYSTEMS</small></span></div>
-            <div className="mono-hero-topline"><span>Portfolio / 2026</span><span>Independent engineer</span><span>Chicago / US</span></div>
+            <div className="hero-identity" aria-hidden="true"><MysmicMark className="hero-sigil" /></div>
             <h1 aria-label="Engineering without edges">
               <span><i>Engineering</i></span>
               <span><i>without edges.</i></span>
             </h1>
             <div className="mono-hero-bottom">
               <p>Building portable systems at the intersection of browsers, games, and security research.</p>
-              <a href="#mono-work" data-cursor="SCROLL" aria-label="Scroll to work"><ArrowDown /></a>
+              <a href="#mono-work" aria-label="Scroll to work"><ArrowDown /></a>
             </div>
           </section>
 
@@ -367,9 +365,9 @@ export default function App() {
                     <div className="mono-card-foot">
                       <ul>{project.tech.map(item => <li key={item}>{item}</li>)}</ul>
                       <div className="mono-card-actions">
-                        <button className="case-trigger" type="button" onClick={() => setActiveProjectIndex(index)} data-cursor="VIEW">Case study <ArrowUpRight /></button>
+                        <button className="case-trigger" type="button" onClick={() => setActiveProjectIndex(index)}>Case study <ArrowUpRight /></button>
                         <Magnet strength={6} padding={80}>
-                          <a href={project.href} target="_blank" rel="noreferrer" data-cursor="OPEN" aria-label={`Open ${project.title} on GitHub`}><GitHubMark /></a>
+                          <a href={project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.title} on GitHub`}><GitHubMark /></a>
                         </Magnet>
                       </div>
                     </div>
@@ -392,24 +390,24 @@ export default function App() {
           </section>
 
           <section className="mono-contact" id="mono-contact">
-            <GodRays />
+            <LineWaves />
             <MysmicMark className="contact-sigil" />
             <Reveal>
               <span className="mono-label">Next experiment</span>
               <h2><span>Have something</span><span>difficult in mind?</span></h2>
               <div className="mono-contact-actions">
                 <Magnet strength={8} padding={90}>
-                  <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer" data-cursor="OPEN"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
+                  <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
                 </Magnet>
                 <Magnet strength={8} padding={90}>
-                  <button className="mono-contact-link is-discord" type="button" onClick={copyDiscordUsername} data-cursor="COPY"><DiscordMark /> {discordCopied ? 'Username copied' : 'Copy Discord username'} {discordCopied ? <Check /> : <Copy />}</button>
+                  <button className="mono-contact-link is-discord" type="button" onClick={copyDiscordUsername}><DiscordMark /> {discordCopied ? 'Username copied' : 'Copy Discord username'} {discordCopied ? <Check /> : <Copy />}</button>
                 </Magnet>
               </div>
             </Reveal>
           </section>
         </main>
 
-        <footer className="mono-footer"><span>Mysmic © 2026</span><a href="#mono-work" data-cursor="WORK">Selected work</a><span>Independent engineer</span></footer>
+        <footer className="mono-footer"><span>Mysmic © 2026</span><a href="#mono-work">Selected work</a></footer>
       </div>
       {activeProjectIndex !== null && (
         <CaseStudy
