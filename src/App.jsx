@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowUpRight, Circle, MessageCircle } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ArrowDown, ArrowUpRight, Circle, Copy, Check } from 'lucide-react';
 import GodRays from './components/GodRays.jsx';
 import Reveal from './components/Reveal.jsx';
 import Magnet from './components/Magnet.jsx';
@@ -54,28 +55,73 @@ function GitHubMark() {
   );
 }
 
-function MonoArt({ type }) {
+function DiscordMark() {
   return (
-    <div className={`mono-art visual-${type}`} aria-hidden="true">
-      <div className="mono-art-grid" />
-      {type === 'signal' && <><i className="signal-wave wave-one" /><i className="signal-wave wave-two" /><b>LIVE</b></>}
-      {type === 'portal' && <><i className="portal-ring" /><i className="portal-ring ring-inner" /><span /></>}
-      {type === 'blocks' && <div className="mono-blocks"><i /><i /><i /><i /></div>}
-      {type === 'spheres' && <div className="mono-spheres"><i /><i /><i /></div>}
+    <svg viewBox="0 0 448 512" width="22" height="22" fill="currentColor" aria-hidden="true">
+      <path d="M297.2 243.2c-13.6 0-24.6 11.2-24.6 25s11.3 25 24.6 25c13.6 0 24.6-11.2 24.6-25s-11-25-24.6-25Zm-88.2 0c-13.6 0-24.6 11.2-24.6 25s11.3 25 24.6 25c13.6 0 24.6-11.2 24.6-25s-11-25-24.6-25ZM448 52.8v406.4c0 29.1-23.5 52.8-52.6 52.8H52.6C23.5 512 0 488.3 0 459.2V52.8C0 23.7 23.5 0 52.6 0h342.7C424.5 0 448 23.7 448 52.8Zm-73.1 82.6c-27.8-13.1-57.7-22.7-88.8-28.3-3.8 6.7-8.2 15.8-11.2 23-33.1-5-65.9-5-98.4 0-3-7.2-7.5-16.3-11.4-23-31.2 5.6-61 15.2-88.9 28.3-56.2 83.7-71.4 165.3-63.8 245.8 37.3 27.5 73.4 44.2 109 55.1 8.8-12 16.6-24.8 23.4-38.2-12.8-4.8-25-10.7-36.8-17.8 3-2.2 6.1-4.6 9-7 71 32.9 147.9 32.9 218.1 0 3 2.4 6 4.8 9 7-11.8 7-24.1 13-36.9 17.8 6.7 13.4 14.6 26.2 23.4 38.2 35.7-11 71.8-27.6 109.1-55.1 9-93.4-15.3-174.2-63.7-245.8Z" />
+    </svg>
+  );
+}
+
+function MonoArt({ type }) {
+  const artRef = useRef(null);
+
+  const handlePointerMove = (event) => {
+    const art = artRef.current;
+    if (!art) return;
+    const rect = art.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+    art.style.setProperty('--art-rotate-x', `${y * -12}deg`);
+    art.style.setProperty('--art-rotate-y', `${x * 15}deg`);
+    art.style.setProperty('--art-light-x', `${(x + 0.5) * 100}%`);
+    art.style.setProperty('--art-light-y', `${(y + 0.5) * 100}%`);
+  };
+
+  const resetPointer = () => {
+    const art = artRef.current;
+    if (!art) return;
+    art.style.setProperty('--art-rotate-x', '0deg');
+    art.style.setProperty('--art-rotate-y', '0deg');
+    art.style.setProperty('--art-light-x', '50%');
+    art.style.setProperty('--art-light-y', '50%');
+  };
+
+  return (
+    <div className={`mono-art visual-${type}`} ref={artRef} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} aria-hidden="true">
+      <div className="mono-art-space" />
+      <div className="mono-art-stage">
+        {type === 'signal' && <div className="signal-model"><i className="signal-globe" /><i className="signal-meridian meridian-a" /><i className="signal-meridian meridian-b" /><i className="signal-orbit" /><b>SYNC</b><span className="signal-satellite satellite-a" /><span className="signal-satellite satellite-b" /></div>}
+        {type === 'portal' && <div className="portal-model"><div className="portal-cube"><i /><i /><i /><i /><i /><i /></div><span className="portal-halo halo-a" /><span className="portal-halo halo-b" /></div>}
+        {type === 'blocks' && <div className="blocks-model"><div className="mono-prism prism-a"><i /><i /><i /></div><div className="mono-prism prism-b"><i /><i /><i /></div><div className="mono-prism prism-c"><i /><i /><i /></div><span className="blocks-axis" /></div>}
+        {type === 'spheres' && <div className="spheres-model"><i className="orbital-sphere sphere-a" /><i className="orbital-sphere sphere-b" /><i className="orbital-sphere sphere-c" /><span className="sphere-orbit orbit-one" /><span className="sphere-orbit orbit-two" /></div>}
+      </div>
+      <span className="mono-art-caption">Pointer reactive / 3D study</span>
     </div>
   );
 }
 
 export default function App() {
+  const [discordCopied, setDiscordCopied] = useState(false);
+
+  const copyDiscordUsername = async () => {
+    try {
+      await navigator.clipboard.writeText('habw');
+      setDiscordCopied(true);
+      window.setTimeout(() => setDiscordCopied(false), 1800);
+    } catch {
+      window.open('https://discord.com/app', '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <ClickSpark colors={['#ffffff', '#777777']} sparkCount={8}>
       <ScrollProgress />
       <div className="monochrome-shell">
         <header className="mono-nav">
           <a className="mono-brand" href="/" aria-label="Mysmic home">
-            <span>MY</span>
-            <span className="mono-brand-slashes" aria-hidden="true"><i>/</i><i>/</i><i>/</i></span>
-            <span>SMIC</span>
+            <span className="mono-brand-mark" aria-hidden="true"><i>M</i></span>
+            <span className="mono-brand-name">MYSMIC</span>
           </a>
           <span><Circle size={7} fill="currentColor" /> Available for collaboration</span>
           <nav>
@@ -158,7 +204,7 @@ export default function App() {
                   <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
                 </Magnet>
                 <Magnet strength={8} padding={90}>
-                  <a className="mono-contact-link is-discord" href="https://discord.com/app" target="_blank" rel="noreferrer" aria-label="Find me on Discord as habw"><MessageCircle /> Find me on Discord <small>@habw</small><ArrowUpRight /></a>
+                  <button className="mono-contact-link is-discord" type="button" onClick={copyDiscordUsername}><DiscordMark /> {discordCopied ? 'Username copied' : 'Copy Discord username'} {discordCopied ? <Check /> : <Copy />}</button>
                 </Magnet>
               </div>
             </Reveal>

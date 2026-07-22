@@ -15,6 +15,27 @@ export default function SystemsField() {
     let active = true;
     let width = 0;
     let height = 0;
+    let stars = [];
+    let pointerX = 0.5;
+    let pointerY = 0.5;
+
+    const buildStars = () => {
+      let seed = 1847;
+      const random = () => {
+        seed = (seed * 16807) % 2147483647;
+        return (seed - 1) / 2147483646;
+      };
+      const count = Math.min(240, Math.max(110, Math.round(width * height / 7200)));
+      stars = Array.from({ length: count }, (_, index) => ({
+        x: random(),
+        y: random(),
+        depth: 0.25 + random() * 0.75,
+        size: 0.45 + random() * 1.45,
+        speed: 2 + random() * 7,
+        phase: random() * Math.PI * 2,
+        anchor: index % 29 === 0,
+      }));
+    };
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -24,69 +45,69 @@ export default function SystemsField() {
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      buildStars();
       draw(0);
     };
 
     const draw = (time) => {
       context.clearRect(0, 0, width, height);
 
-      const spacing = width < 700 ? 62 : 92;
-      const columns = Math.ceil(width / spacing) + 2;
-      const rows = Math.ceil(height / spacing) + 2;
-      const clock = motionQuery.matches ? 0 : time * 0.00028;
-      const scroll = window.scrollY * 0.0022;
-      const points = [];
+      const clock = motionQuery.matches ? 0 : time * 0.001;
+      const scroll = window.scrollY * 0.012;
+      const parallaxX = (pointerX - 0.5) * 34;
+      const parallaxY = (pointerY - 0.5) * 22;
+      const projected = [];
 
-      for (let row = -1; row < rows; row += 1) {
-        const line = [];
-        for (let column = -1; column < columns; column += 1) {
-          const baseX = column * spacing + (row % 2 ? spacing * 0.5 : 0);
-          const baseY = row * spacing;
-          line.push({
-            x: baseX + Math.sin(row * 0.72 + clock * 3 + scroll) * 18,
-            y: baseY + Math.cos(column * 0.58 - clock * 2.2 + scroll * 0.45) * 9,
-          });
+      stars.forEach((star) => {
+        const x = star.x * width + parallaxX * star.depth;
+        const travel = clock * star.speed + scroll * star.depth;
+        const y = ((star.y * (height + 50) + travel + parallaxY * star.depth) % (height + 50)) - 25;
+        const pulse = 0.48 + Math.sin(clock * 1.7 + star.phase) * 0.28;
+        const radius = star.size * star.depth;
+        projected.push({ x, y, anchor: star.anchor });
+
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fillStyle = `rgba(255,255,255,${0.18 + pulse * star.depth * 0.62})`;
+        context.fill();
+
+        if (star.anchor) {
+          context.strokeStyle = `rgba(255,255,255,${0.14 + pulse * 0.18})`;
+          context.lineWidth = 0.7;
+          context.beginPath();
+          context.moveTo(x - 5, y);
+          context.lineTo(x + 5, y);
+          context.moveTo(x, y - 5);
+          context.lineTo(x, y + 5);
+          context.stroke();
         }
-        points.push(line);
-      }
+      });
 
-      context.lineWidth = 0.7;
-      context.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+      const anchors = projected.filter(point => point.anchor);
+      context.strokeStyle = 'rgba(255,255,255,.09)';
+      context.lineWidth = 0.65;
       context.beginPath();
-      points.forEach((line, row) => {
-        line.forEach((point, column) => {
-          const right = line[column + 1];
-          const down = points[row + 1]?.[column];
-          if (right) {
-            context.moveTo(point.x, point.y);
-            context.lineTo(right.x, right.y);
-          }
-          if (down) {
-            context.moveTo(point.x, point.y);
-            context.lineTo(down.x, down.y);
-          }
-        });
+      anchors.forEach((point, index) => {
+        const next = anchors[index + 1];
+        if (next && Math.hypot(next.x - point.x, next.y - point.y) < width * 0.34) {
+          context.moveTo(point.x, point.y);
+          context.lineTo(next.x, next.y);
+        }
       });
       context.stroke();
 
-      points.forEach((line, row) => {
-        line.forEach((point, column) => {
-          const pulse = (Math.sin(clock * 4 + row * 0.8 + column * 0.55) + 1) * 0.5;
-          const isNode = (row + column) % 7 === 0;
-          context.beginPath();
-          context.arc(point.x, point.y, isNode ? 2.1 + pulse : 0.9, 0, Math.PI * 2);
-          context.fillStyle = `rgba(255, 255, 255, ${isNode ? 0.42 : 0.17})`;
-          context.fill();
-        });
-      });
-
-      const sweepY = motionQuery.matches ? height * 0.36 : ((time * 0.035) % (height + 240)) - 120;
-      const sweep = context.createLinearGradient(0, sweepY - 100, 0, sweepY + 100);
-      sweep.addColorStop(0, 'rgba(255,255,255,0)');
-      sweep.addColorStop(0.5, 'rgba(255,255,255,0.13)');
-      sweep.addColorStop(1, 'rgba(255,255,255,0)');
-      context.fillStyle = sweep;
-      context.fillRect(0, sweepY - 100, width, 200);
+      const meteorPhase = motionQuery.matches ? 0.42 : (clock * 0.028) % 1;
+      const meteorX = width * (1.12 - meteorPhase * 1.35);
+      const meteorY = height * (0.12 + meteorPhase * 0.34);
+      const meteor = context.createLinearGradient(meteorX, meteorY, meteorX + 110, meteorY - 45);
+      meteor.addColorStop(0, 'rgba(255,255,255,.62)');
+      meteor.addColorStop(1, 'rgba(255,255,255,0)');
+      context.strokeStyle = meteor;
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(meteorX, meteorY);
+      context.lineTo(meteorX + 110, meteorY - 45);
+      context.stroke();
 
       if (active && !motionQuery.matches) frame = window.requestAnimationFrame(draw);
     };
@@ -102,9 +123,15 @@ export default function SystemsField() {
       else window.cancelAnimationFrame(frame);
     });
     const resizeObserver = new ResizeObserver(resize);
+    const handlePointer = (event) => {
+      const rect = wrap.getBoundingClientRect();
+      pointerX = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+      pointerY = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+    };
 
     observer.observe(wrap);
     resizeObserver.observe(canvas);
+    wrap.addEventListener('pointermove', handlePointer, { passive: true });
     motionQuery.addEventListener('change', start);
     resize();
     start();
@@ -113,17 +140,15 @@ export default function SystemsField() {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
       resizeObserver.disconnect();
+      wrap.removeEventListener('pointermove', handlePointer);
       motionQuery.removeEventListener('change', start);
     };
   }, []);
 
   return (
     <div className="systems-field" ref={wrapRef} aria-hidden="true">
-      <div className="systems-field-grid" />
-      <i className="systems-orbit orbit-a" />
-      <i className="systems-orbit orbit-b" />
-      <i className="systems-orbit orbit-c" />
-      <i className="systems-orbit orbit-d" />
+      <div className="systems-nebula" />
+      <div className="systems-horizon" />
       <canvas ref={canvasRef} />
     </div>
   );
