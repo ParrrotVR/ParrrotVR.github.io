@@ -72,7 +72,7 @@ export default function App() {
       <ScrollProgress />
       <div className="monochrome-shell">
         <header className="mono-nav">
-          <a className="mono-brand" href="/">P///VR</a>
+          <a className="mono-brand" href="/" aria-label="Mysmic home">MYSMIC</a>
           <span><Circle size={7} fill="currentColor" /> Available for collaboration</span>
           <nav>
             <a href="#mono-work">Work</a>
@@ -144,11 +144,11 @@ export default function App() {
             </Reveal>
           </section>
 
-          <section className="mono-contact">
+          <section className="mono-contact" id="mono-contact">
             <GodRays />
             <Reveal>
               <span className="mono-label">Next experiment</span>
-              <h2>Have something<br />difficult in mind?</h2>
+              <h2><span>Have something</span><span>difficult in mind?</span></h2>
               <Magnet strength={6} padding={100}>
                 <a className="mono-contact-link" href="https://github.com/ParrrotVR" target="_blank" rel="noreferrer"><GitHubMark /> Find me on GitHub <ArrowUpRight /></a>
               </Magnet>
@@ -156,7 +156,7 @@ export default function App() {
           </section>
         </main>
 
-        <footer className="mono-footer"><span>ParrrotVR © 2026</span><a href="#mono-work">Selected work</a><span>Independent engineer</span></footer>
+        <footer className="mono-footer"><span>Mysmic © 2026</span><a href="#mono-work">Selected work</a><span>Independent engineer</span></footer>
       </div>
     </ClickSpark>
   );
