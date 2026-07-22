@@ -9,6 +9,14 @@ import SystemsField from './components/SystemsField.jsx';
 import DitherField from './components/DitherField.jsx';
 import MysmicCursor from './components/MysmicCursor.jsx';
 import LineWaves from './components/LineWaves.jsx';
+import SoftAurora from './components/SoftAurora.jsx';
+import PlasmaWave from './components/PlasmaWave.jsx';
+
+const contactEffects = [
+  { name: 'Line waves', component: LineWaves },
+  { name: 'Soft aurora', component: SoftAurora },
+  { name: 'Plasma ribbons', component: PlasmaWave },
+];
 
 const projects = [
   {
@@ -290,10 +298,15 @@ function MonoArt({ type }) {
 export default function App() {
   const [discordCopied, setDiscordCopied] = useState(false);
   const [activeProjectIndex, setActiveProjectIndex] = useState(null);
+  const [contactEffectIndex, setContactEffectIndex] = useState(0);
+  const ContactEffect = contactEffects[contactEffectIndex].component;
 
   const closeCaseStudy = () => setActiveProjectIndex(null);
   const navigateCaseStudy = (direction) => {
     setActiveProjectIndex(current => (current + direction + projects.length) % projects.length);
+  };
+  const cycleContactEffect = (direction) => {
+    setContactEffectIndex(current => (current + direction + contactEffects.length) % contactEffects.length);
   };
 
   const copyDiscordUsername = async () => {
@@ -314,7 +327,12 @@ export default function App() {
         <header className="mono-nav">
           <a className="mono-brand" href="/" aria-label="Mysmic home">
             <MysmicMark className="mono-brand-mark is-nav" />
-            <span className="mono-brand-name">MYSMIC</span>
+            <span className="mono-brand-word">
+              <span className="mono-brand-name">MYSMIC</span>
+              <svg className="mono-brand-trace" viewBox="0 0 180 70" preserveAspectRatio="none" aria-hidden="true">
+                <path pathLength="1" d="M64 8 C112 7 151 15 168 29 C181 40 177 52 157 58 C128 66 78 67 36 64 C17 63 6 59 2 55" />
+              </svg>
+            </span>
           </a>
           <nav>
             <a href="#mono-work">Work</a>
@@ -390,7 +408,9 @@ export default function App() {
           </section>
 
           <section className="mono-contact" id="mono-contact">
-            <LineWaves />
+            <div className="contact-effect-stage" key={contactEffectIndex}>
+              <ContactEffect />
+            </div>
             <MysmicMark className="contact-sigil" />
             <Reveal>
               <span className="mono-label">Next experiment</span>
@@ -404,6 +424,11 @@ export default function App() {
                 </Magnet>
               </div>
             </Reveal>
+            <div className="contact-effect-switcher" role="group" aria-label="Contact background preview">
+              <button type="button" onClick={() => cycleContactEffect(-1)} aria-label="Previous background"><ArrowLeft /></button>
+              <span><b>{contactEffects[contactEffectIndex].name}</b><small>{String(contactEffectIndex + 1).padStart(2, '0')} / {String(contactEffects.length).padStart(2, '0')}</small></span>
+              <button type="button" onClick={() => cycleContactEffect(1)} aria-label="Next background"><ArrowRight /></button>
+            </div>
           </section>
         </main>
 

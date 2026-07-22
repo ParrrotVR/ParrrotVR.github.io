@@ -2,7 +2,7 @@
 
 ## React Bits
 
-The Click Spark and Magnet interactions, Light Rays treatment, and Line Waves treatment are adapted from
+The Click Spark and Magnet interactions and the Light Rays, Line Waves, Soft Aurora, and Plasma Wave treatments are adapted from
 [React Bits](https://reactbits.dev/).
 
 MIT + Commons Clause License Condition v1.0
