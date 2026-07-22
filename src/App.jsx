@@ -13,9 +13,9 @@ import SoftAurora from './components/SoftAurora.jsx';
 import PlasmaWave from './components/PlasmaWave.jsx';
 
 const contactEffects = [
-  { name: 'Line waves', component: LineWaves },
-  { name: 'Soft aurora', component: SoftAurora },
-  { name: 'Plasma ribbons', component: PlasmaWave },
+  LineWaves,
+  SoftAurora,
+  PlasmaWave,
 ];
 
 const projects = [
@@ -298,17 +298,13 @@ function MonoArt({ type }) {
 export default function App() {
   const [discordCopied, setDiscordCopied] = useState(false);
   const [activeProjectIndex, setActiveProjectIndex] = useState(null);
-  const [contactEffectIndex, setContactEffectIndex] = useState(0);
-  const ContactEffect = contactEffects[contactEffectIndex].component;
+  const [contactEffectIndex] = useState(() => Math.floor(Math.random() * contactEffects.length));
+  const ContactEffect = contactEffects[contactEffectIndex];
 
   const closeCaseStudy = () => setActiveProjectIndex(null);
   const navigateCaseStudy = (direction) => {
     setActiveProjectIndex(current => (current + direction + projects.length) % projects.length);
   };
-  const cycleContactEffect = (direction) => {
-    setContactEffectIndex(current => (current + direction + contactEffects.length) % contactEffects.length);
-  };
-
   const copyDiscordUsername = async () => {
     try {
       await navigator.clipboard.writeText('habw');
@@ -329,8 +325,8 @@ export default function App() {
             <MysmicMark className="mono-brand-mark is-nav" />
             <span className="mono-brand-word">
               <span className="mono-brand-name">MYSMIC</span>
-              <svg className="mono-brand-trace" viewBox="0 0 180 70" preserveAspectRatio="none" aria-hidden="true">
-                <path pathLength="1" d="M64 8 C112 7 151 15 168 29 C181 40 177 52 157 58 C128 66 78 67 36 64 C17 63 6 59 2 55" />
+              <svg className="mono-brand-trace" viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true">
+                <path pathLength="1" d="M2 35 C12 35 15 19 26 19 C36 19 39 32 49 30 C61 28 65 12 79 7" />
               </svg>
             </span>
           </a>
@@ -424,11 +420,6 @@ export default function App() {
                 </Magnet>
               </div>
             </Reveal>
-            <div className="contact-effect-switcher" role="group" aria-label="Contact background preview">
-              <button type="button" onClick={() => cycleContactEffect(-1)} aria-label="Previous background"><ArrowLeft /></button>
-              <span><b>{contactEffects[contactEffectIndex].name}</b><small>{String(contactEffectIndex + 1).padStart(2, '0')} / {String(contactEffects.length).padStart(2, '0')}</small></span>
-              <button type="button" onClick={() => cycleContactEffect(1)} aria-label="Next background"><ArrowRight /></button>
-            </div>
           </section>
         </main>
 
