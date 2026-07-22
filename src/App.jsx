@@ -74,10 +74,17 @@ function MonoArt({ type }) {
     targetY: 0,
     targetLightX: 50,
     targetLightY: 50,
+    velocityX: 0,
+    velocityY: 0,
+    pointerX: 0,
+    pointerY: 0,
+    engagement: 0,
+    hovering: false,
+    lastTime: 0,
     frame: 0,
   });
 
-  const animateTilt = () => {
+  const animateTilt = (time) => {
     const art = artRef.current;
     const motion = motionRef.current;
     if (!art) {
@@ -85,22 +92,45 @@ function MonoArt({ type }) {
       return;
     }
 
-    const easing = 0.085;
-    motion.currentX += (motion.targetX - motion.currentX) * easing;
-    motion.currentY += (motion.targetY - motion.currentY) * easing;
-    motion.currentLightX += (motion.targetLightX - motion.currentLightX) * easing;
-    motion.currentLightY += (motion.targetLightY - motion.currentLightY) * easing;
+    const delta = motion.lastTime ? Math.min((time - motion.lastTime) / 1000, 0.032) : 1 / 60;
+    motion.lastTime = time;
+
+    const engageEase = 1 - Math.exp(-delta * 5.2);
+    const engagementTarget = motion.hovering ? 1 : 0;
+    motion.engagement += (engagementTarget - motion.engagement) * engageEase;
+    motion.targetX = motion.pointerY * -12 * motion.engagement;
+    motion.targetY = motion.pointerX * 15 * motion.engagement;
+    motion.targetLightX = 50 + motion.pointerX * 100 * motion.engagement;
+    motion.targetLightY = 50 + motion.pointerY * 100 * motion.engagement;
+
+    const spring = 68;
+    const damping = Math.exp(-12.5 * delta);
+    motion.velocityX = (motion.velocityX + (motion.targetX - motion.currentX) * spring * delta) * damping;
+    motion.velocityY = (motion.velocityY + (motion.targetY - motion.currentY) * spring * delta) * damping;
+    motion.currentX += motion.velocityX * delta;
+    motion.currentY += motion.velocityY * delta;
+
+    const lightEase = 1 - Math.exp(-delta * 5.8);
+    motion.currentLightX += (motion.targetLightX - motion.currentLightX) * lightEase;
+    motion.currentLightY += (motion.targetLightY - motion.currentLightY) * lightEase;
 
     art.style.setProperty('--art-rotate-x', `${motion.currentX}deg`);
     art.style.setProperty('--art-rotate-y', `${motion.currentY}deg`);
     art.style.setProperty('--art-light-x', `${motion.currentLightX}%`);
     art.style.setProperty('--art-light-y', `${motion.currentLightY}%`);
 
-    const unsettled = Math.abs(motion.targetX - motion.currentX) > 0.01
+    const unsettled = Math.abs(engagementTarget - motion.engagement) > 0.001
+      || Math.abs(motion.targetX - motion.currentX) > 0.01
       || Math.abs(motion.targetY - motion.currentY) > 0.01
+      || Math.abs(motion.velocityX) > 0.01
+      || Math.abs(motion.velocityY) > 0.01
       || Math.abs(motion.targetLightX - motion.currentLightX) > 0.05
       || Math.abs(motion.targetLightY - motion.currentLightY) > 0.05;
-    motion.frame = unsettled ? window.requestAnimationFrame(animateTilt) : 0;
+    if (unsettled) motion.frame = window.requestAnimationFrame(animateTilt);
+    else {
+      motion.lastTime = 0;
+      motion.frame = 0;
+    }
   };
 
   const startTilt = () => {
@@ -117,24 +147,22 @@ function MonoArt({ type }) {
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
     const motion = motionRef.current;
-    motion.targetX = y * -12;
-    motion.targetY = x * 15;
-    motion.targetLightX = (x + 0.5) * 100;
-    motion.targetLightY = (y + 0.5) * 100;
+    motion.pointerX = Math.min(0.5, Math.max(-0.5, x));
+    motion.pointerY = Math.min(0.5, Math.max(-0.5, y));
+    motion.hovering = true;
     startTilt();
   };
 
   const resetPointer = () => {
     const motion = motionRef.current;
-    motion.targetX = 0;
-    motion.targetY = 0;
-    motion.targetLightX = 50;
-    motion.targetLightY = 50;
+    motion.hovering = false;
+    motion.pointerX = 0;
+    motion.pointerY = 0;
     startTilt();
   };
 
   return (
-    <div className={`mono-art visual-${type}`} ref={artRef} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} aria-hidden="true">
+    <div className={`mono-art visual-${type}`} ref={artRef} onPointerEnter={handlePointerMove} onPointerMove={handlePointerMove} onPointerLeave={resetPointer} aria-hidden="true">
       <div className="mono-art-space" />
       <div className="mono-art-stage">
         {type === 'signal' && <div className="signal-model"><i className="signal-globe" /><i className="signal-meridian meridian-a" /><i className="signal-meridian meridian-b" /><i className="signal-orbit" /><b>SYNC</b><span className="signal-satellite satellite-a" /><span className="signal-satellite satellite-b" /></div>}

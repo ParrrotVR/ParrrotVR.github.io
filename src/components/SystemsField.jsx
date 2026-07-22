@@ -18,6 +18,8 @@ export default function SystemsField() {
     let stars = [];
     let pointerX = 0.5;
     let pointerY = 0.5;
+    let targetPointerX = 0.5;
+    let targetPointerY = 0.5;
 
     const buildStars = () => {
       let seed = 1847;
@@ -54,6 +56,10 @@ export default function SystemsField() {
 
       const clock = motionQuery.matches ? 0 : time * 0.001;
       const scroll = window.scrollY * 0.012;
+      if (!motionQuery.matches) {
+        pointerX += (targetPointerX - pointerX) * 0.035;
+        pointerY += (targetPointerY - pointerY) * 0.035;
+      }
       const parallaxX = (pointerX - 0.5) * 34;
       const parallaxY = (pointerY - 0.5) * 22;
       const projected = [];
@@ -124,14 +130,13 @@ export default function SystemsField() {
     });
     const resizeObserver = new ResizeObserver(resize);
     const handlePointer = (event) => {
-      const rect = wrap.getBoundingClientRect();
-      pointerX = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
-      pointerY = Math.min(1, Math.max(0, (event.clientY - rect.top) / rect.height));
+      targetPointerX = Math.min(1, Math.max(0, event.clientX / window.innerWidth));
+      targetPointerY = Math.min(1, Math.max(0, event.clientY / window.innerHeight));
     };
 
     observer.observe(wrap);
     resizeObserver.observe(canvas);
-    wrap.addEventListener('pointermove', handlePointer, { passive: true });
+    window.addEventListener('pointermove', handlePointer, { passive: true });
     motionQuery.addEventListener('change', start);
     resize();
     start();
@@ -140,7 +145,7 @@ export default function SystemsField() {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
       resizeObserver.disconnect();
-      wrap.removeEventListener('pointermove', handlePointer);
+      window.removeEventListener('pointermove', handlePointer);
       motionQuery.removeEventListener('change', start);
     };
   }, []);
